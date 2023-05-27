@@ -1,15 +1,17 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from models.events import Event
+from sqlmodel import JSON, SQLModel, Field, Column
 
-class User(BaseModel):
-    id: Optional[int]
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     email: EmailStr
     password: str
     username: str
-    events: Optional[List[Event]]
+    events: Optional[List[Event]] = Field(sa_column=Column(JSON))
 
     class Config:
+        arbitrary_types_allowed = True
         schema_extra = {
             "example": {
                 "email": "robin.s@hpe.com",
@@ -28,7 +30,7 @@ class User(BaseModel):
         }
 
 
-class UserSignIn(BaseModel):
+class UserSignIn(SQLModel):
     email: EmailStr
     password: str
 
@@ -40,3 +42,7 @@ class UserSignIn(BaseModel):
                 "events": []
             }
         }
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
